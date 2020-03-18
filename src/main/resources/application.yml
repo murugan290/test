@@ -1,0 +1,15 @@
+info:
+  description: "Service for Customer Statement Records Validation"
+
+spring:
+  application:
+    name: customer-statement-processor
+
+
+
+security:
+  basic:
+    enabled: false
+
+server:
+  port: 8112
