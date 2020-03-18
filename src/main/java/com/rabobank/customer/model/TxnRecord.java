@@ -55,7 +55,7 @@ public class TxnRecord implements Serializable{
 	@JsonProperty(value ="End Balance" , access = JsonProperty.Access.WRITE_ONLY)
 	private String endBalance;
 
-	@JsonIgnore
+	//@JsonIgnore
 	private List<String> failureReason = new ArrayList<>();
 
 }

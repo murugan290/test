@@ -8,8 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,9 +18,7 @@ public class CustomerStatementService {
     public List<TxnRecord> processTransactionRecords(MultipartFile file){
         String fileType = file.getContentType();
         TxnRecordValidationUtil.validateInputFile(file, fileType);
-
         return validateCustomerTxnRecords(file);
-
     }
 
     public List<TxnRecord> validateCustomerTxnRecords(MultipartFile file) {
@@ -38,31 +35,26 @@ public class CustomerStatementService {
     }
 
     private List<TxnRecord> executeBusinessRules(List<TxnRecord> transactionRecords){
-        List<TxnRecord> reports = new ArrayList<>();
-        List<String> processedRecords = new ArrayList<>();
+        Set<String> allItems = new HashSet<>();
+        Set<String> refrenceNumbers = transactionRecords.stream().map( txn -> txn.getReference() )
+                .filter( txnData -> !allItems.add( txnData ) ).collect( Collectors.toSet() );
+        List<TxnRecord> errorRecords = transactionRecords.stream()
+                                       .filter( t -> refrenceNumbers.contains( t.getReference() ) )
+                                       .peek( t -> t.getFailureReason().add( "DUPLICATE_REFERENCE" ) )
+                                       .collect( Collectors.toList() );
+        errorRecords.stream().forEach( txn -> {
+            if (validateEndBalance( txn )) {
+                txn.getFailureReason().add( "BALANCE_MISMATCHED" );
+            }
+        } );
 
-        transactionRecords.forEach(txnData ->{
-
-                if(validateTransactionReference(processedRecords,txnData)){
-                    reports.add(txnData); // records which failed with given business rules validation like duplication or improper end-balance
-                }
-                if(validateEndBalance(txnData)){
-                    reports.add(txnData);
-                }
-            processedRecords.add(txnData.getReference());
-        });
-        processedRecords.clear();
-        return reports;
-    }
-
-    private boolean validateTransactionReference(List<String> processedRecords,TxnRecord txnRecord){
-        boolean res = false;
-        if(!txnRecord.getReference().isEmpty() && !processedRecords.isEmpty()
-                && processedRecords.contains(txnRecord.getReference())){
-            txnRecord.getFailureReason().add("DUPLICATE_REFERENCE");
-            res = true;
-        }
-        return res;
+        List<TxnRecord> incorrectBalanceRecords = transactionRecords.stream()
+                .filter( txn -> !refrenceNumbers.contains( txn.getReference()) )
+                .filter(txn -> validateEndBalance(txn))
+                .peek( txn -> txn.getFailureReason().add("BALANCE_MISMATCHED"))
+                .collect( Collectors.toList());
+        errorRecords.addAll( incorrectBalanceRecords );
+        return errorRecords;
     }
 
     private boolean validateEndBalance(TxnRecord txnRecord){
@@ -71,8 +63,6 @@ public class CustomerStatementService {
         BigDecimal mutation = new BigDecimal(txnRecord.getMutation()).setScale(2);
         BigDecimal endBalance = new BigDecimal(txnRecord.getEndBalance()).setScale(2);
         if((startBalance.add(mutation)).compareTo(endBalance)!=0){
-
-            txnRecord.getFailureReason().add("BALANCE_MISMATCHED");
             res = true;
         }
         return res;

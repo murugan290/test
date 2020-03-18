@@ -3,6 +3,7 @@ package com.rabobank.customer.handler;
 import com.rabobank.customer.exception.IncorrectCustomerDataException;
 import com.rabobank.customer.model.TxnRecord;
 import com.rabobank.customer.response.ValidationOutcome;
+import com.sun.org.apache.bcel.internal.generic.DUP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -25,41 +26,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         int failedRecords = ex.getFailedRecords().size();
 
-       long DUPLICATE_REFERENCE_INCORRECT_BALANCE = ex.getFailedRecords().stream().filter(txn ->
-            (txn.getFailureReason().size()>1 || (txn.getFailureReason().size()==1 && txn.getFailureReason().get(0).startsWith("DUPLICATE") ||
-                    txn.getFailureReason().get(0).startsWith("BALANCE") ))
-        ).count();
+        long DUPLICATE_REFERENCE_INCORRECT_BALANCE = ex.getFailedRecords().stream()
+                .filter( txn -> (txn.getFailureReason().size() > 1) )
+                .count();
+       if(DUPLICATE_REFERENCE_INCORRECT_BALANCE > 0){
+           ValidationOutcome result = new ValidationOutcome(
+                   "DUPLICATE_REFERENCE_INCORRECT_END_BALANCE", ex.getFailedRecords());
+           return ResponseEntity.status(ex.getStatusCode()).body(result);
 
-        long DUPLICATE_REFERENCE = ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("DUPLICATE")).count();
+       }else if(ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("DUPLICATE")).count() > 0 &&
+               ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("DUPLICATE")).count() == failedRecords)
+       {
+           ValidationOutcome result = new ValidationOutcome(
+                   "DUPLICATE_REFERENCE", ex.getFailedRecords());
+           return ResponseEntity.status(ex.getStatusCode()).body(result);
 
-        long INCORRECT_BALANCE = ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("BALANCE")).count();
-
-        if(failedRecords == INCORRECT_BALANCE){
-            ValidationOutcome result = new ValidationOutcome(
-                    "INCORRECT_END_BALANCE", ex.getFailedRecords());
-            return ResponseEntity.status(ex.getStatusCode()).body(result);
-        }else if(failedRecords == DUPLICATE_REFERENCE){
-            ValidationOutcome result = new ValidationOutcome(
-                    "DUPLICATE_REFERENCE", ex.getFailedRecords());
-            return ResponseEntity.status(ex.getStatusCode()).body(result);
-        }else /*(failedRecords == INCORRECT_BALANCE) */{
-            ValidationOutcome result = new ValidationOutcome(
-                    "DUPLICATE_REFERENCE_INCORRECT_END_BALANCE", ex.getFailedRecords());
-            return ResponseEntity.status(ex.getStatusCode()).body(result);
-        }
-
-
-
-        /*long count = ex.getFailedRecords().stream().filter(t -> t.getFailureReason().get(0).startsWith("DUPLICATE") ||
-                t.getFailureReason().get(0).startsWith("BALANCE") ).count();
-
-
-
-        if(count>1){
-            log.info("success..........");
-        }*/
-
-
+       }else if (ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("BALANCE")).count() > 0 &&
+                ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("BALANCE")).count() == failedRecords){
+           ValidationOutcome result = new ValidationOutcome(
+                   "INCORRECT_BALANCE", ex.getFailedRecords());
+           return ResponseEntity.status(ex.getStatusCode()).body(result);
+       }else{
+           ValidationOutcome result = new ValidationOutcome(
+                   "DUPLICATE_REFERENCE_INCORRECT_END_BALANCE", ex.getFailedRecords());
+           return ResponseEntity.status(ex.getStatusCode()).body(result);
+       }
     }
 
 }
