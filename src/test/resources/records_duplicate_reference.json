@@ -1,0 +1,19 @@
+[
+  {
+    "Reference": 194261,
+    "AccountNumber": "NL91RABO0315273637",
+    "Description": "Clothes from Jan Bakker",
+    "Start Balance": 21.6,
+    "Mutation": -41.83,
+    "End Balance": -20.23
+  },
+  {
+    "Reference": 194261,
+    "AccountNumber": "NL27SNSB0917829871",
+    "Description": "Clothes for Willem Dekker",
+    "Start Balance": 91.23,
+    "Mutation": "+15.57",
+    "End Balance": 106.8
+  }
+ 
+]

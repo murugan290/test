@@ -29,20 +29,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         long DUPLICATE_REFERENCE_INCORRECT_BALANCE = ex.getFailedRecords().stream()
                 .filter( txn -> (txn.getFailureReason().size() > 1) )
                 .count();
+        long duplicateTransactionReference = ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("DUPLICATE")).count();
+        long balanceMismatchRecords = ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("BALANCE")).count();
+        log.info( "duplicateTransactionReference " + duplicateTransactionReference );
+
        if(DUPLICATE_REFERENCE_INCORRECT_BALANCE > 0){
            ValidationOutcome result = new ValidationOutcome(
                    "DUPLICATE_REFERENCE_INCORRECT_END_BALANCE", ex.getFailedRecords());
            return ResponseEntity.status(ex.getStatusCode()).body(result);
 
-       }else if(ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("DUPLICATE")).count() > 0 &&
-               ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("DUPLICATE")).count() == failedRecords)
+       }else if(duplicateTransactionReference > 0 && duplicateTransactionReference == failedRecords)
        {
            ValidationOutcome result = new ValidationOutcome(
                    "DUPLICATE_REFERENCE", ex.getFailedRecords());
            return ResponseEntity.status(ex.getStatusCode()).body(result);
 
-       }else if (ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("BALANCE")).count() > 0 &&
-                ex.getFailedRecords().stream().filter(txn -> txn.getFailureReason().get(0).startsWith("BALANCE")).count() == failedRecords){
+       }else if (balanceMismatchRecords > 0 && balanceMismatchRecords == failedRecords){
            ValidationOutcome result = new ValidationOutcome(
                    "INCORRECT_BALANCE", ex.getFailedRecords());
            return ResponseEntity.status(ex.getStatusCode()).body(result);
