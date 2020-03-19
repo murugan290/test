@@ -1,8 +1,12 @@
 package com.rabobank.customer.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabobank.customer.exception.FileParsingException;
 import com.rabobank.customer.model.TxnRecord;
 import com.rabobank.customer.utils.TxnRecordValidationUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +18,7 @@ import java.util.stream.Stream;
 
 @Service
 public class CustomerStatementService {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerStatementService.class);
     public List<TxnRecord> processTransactionRecords(MultipartFile file){
         String fileType = file.getContentType();
         TxnRecordValidationUtil.validateInputFile(file, fileType);
@@ -28,16 +32,17 @@ public class CustomerStatementService {
             detail = objectMapper.readValue(file.getInputStream(), TxnRecord[].class);
             //LOGGER.info("details " + detail.length);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Parsing file with fileName = {} failed. And the reason is : {}", file.getName() , e);
+            throw new FileParsingException(HttpStatus.BAD_REQUEST.value() ,"BAD_REQUEST");
         }
         List<TxnRecord> transactionRecords = Stream.of(detail).collect( Collectors.toList());
         return executeBusinessRules(transactionRecords);
     }
 
     private List<TxnRecord> executeBusinessRules(List<TxnRecord> transactionRecords){
-        Set<String> allItems = new HashSet<>();
+        Set<String> customerTxnReference = new HashSet<>();
         Set<String> refrenceNumbers = transactionRecords.stream().map( txn -> txn.getReference() )
-                .filter( txnData -> !allItems.add( txnData ) ).collect( Collectors.toSet() );
+                .filter( txnData -> !customerTxnReference.add( txnData ) ).collect( Collectors.toSet() );
         List<TxnRecord> errorRecords = transactionRecords.stream()
                                        .filter( t -> refrenceNumbers.contains( t.getReference() ) )
                                        .peek( t -> t.getFailureReason().add( "DUPLICATE_REFERENCE" ) )

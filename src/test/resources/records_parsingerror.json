@@ -1,0 +1,18 @@
+[
+  {
+    "Reference": 183356,
+    "AccountNumber": "NL74ABNA0248990274",
+    "Description": "Subscription for Peter de Vries",
+    "Start Balance": 92.98,
+    "Mutation": -46.65,
+    "End Balance": 46.33
+  },
+  {
+    "Reference": 183356,
+    "AccountNumber": "NL27SNSB0917829871",
+    "Description": "Clothes for Willem Dekker",
+    "Start Balance": 91.23,
+    "Mutation": "+15.57",
+    "End Balance": 106.8
+  }}
+  ]
