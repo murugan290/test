@@ -21,26 +21,11 @@ public class ValidationOutcome {
     /**
      *
      * @param message
-     * @param txnRecords
+     * @param errorRecords
      */
     public ValidationOutcome(String message, List<TxnRecord> errorRecords) {
-        //super(message);
         this.message = message;
         this.errorRecords = errorRecords;
     }
-
-   /* *//**
-     * @return the recordDetails
-     *//*
-    public List<TxnRecord> getErrorRecords() {
-        return errorRecords;
-    }
-
-    *//**
-     * @param errorRecords the error txn records to set
-     *//*
-    public void setErrorRecords(List<TxnRecord> errorRecords) {
-        this.errorRecords = errorRecords;
-    }*/
 
 }

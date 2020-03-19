@@ -1,6 +1,7 @@
 package com.rabobank.customer.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabobank.customer.constants.Constants;
 import com.rabobank.customer.exception.FileParsingException;
 import com.rabobank.customer.model.TxnRecord;
 import com.rabobank.customer.utils.TxnRecordValidationUtil;
@@ -11,53 +12,47 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+/**
+ * @author - Murugan Rajendran
+ *
+ */
+
 
 @Service
 public class CustomerStatementService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerStatementService.class);
+
+
     public List<TxnRecord> processTransactionRecords(MultipartFile file){
         String fileType = file.getContentType();
         TxnRecordValidationUtil.validateInputFile(file, fileType);
         return validateCustomerTxnRecords(file);
     }
 
-    public List<TxnRecord> validateCustomerTxnRecords(MultipartFile file) {
+    private List<TxnRecord> validateCustomerTxnRecords(MultipartFile file){
         TxnRecord[] detail = null;
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             detail = objectMapper.readValue(file.getInputStream(), TxnRecord[].class);
-            //LOGGER.info("details " + detail.length);
         } catch (IOException e) {
             LOGGER.error("Parsing file with fileName = {} failed. And the reason is : {}", file.getName() , e);
-            throw new FileParsingException(HttpStatus.BAD_REQUEST.value() ,"BAD_REQUEST");
+            throw new FileParsingException(HttpStatus.BAD_REQUEST.value() , Constants.BAD_REQUEST );
         }
         List<TxnRecord> transactionRecords = Stream.of(detail).collect( Collectors.toList());
         return executeBusinessRules(transactionRecords);
     }
 
     private List<TxnRecord> executeBusinessRules(List<TxnRecord> transactionRecords){
-        Set<String> customerTxnReference = new HashSet<>();
-        Set<String> refrenceNumbers = transactionRecords.stream().map( txn -> txn.getReference() )
-                .filter( txnData -> !customerTxnReference.add( txnData ) ).collect( Collectors.toSet() );
-        List<TxnRecord> errorRecords = transactionRecords.stream()
-                                       .filter( t -> refrenceNumbers.contains( t.getReference() ) )
-                                       .peek( t -> t.getFailureReason().add( "DUPLICATE_REFERENCE" ) )
-                                       .collect( Collectors.toList() );
-        errorRecords.stream().forEach( txn -> {
-            if (validateEndBalance( txn )) {
-                txn.getFailureReason().add( "BALANCE_MISMATCHED" );
-            }
-        } );
 
-        List<TxnRecord> incorrectBalanceRecords = transactionRecords.stream()
-                .filter( txn -> !refrenceNumbers.contains( txn.getReference()) )
-                .filter(txn -> validateEndBalance(txn))
-                .peek( txn -> txn.getFailureReason().add("BALANCE_MISMATCHED"))
-                .collect( Collectors.toList());
+        Set<String> referenceNumbers = findDuplicateReferenceData( transactionRecords );
+        List<TxnRecord> errorRecords = updateFailureReasonInDuplicateReferenceRecords( transactionRecords, referenceNumbers );
+        List<TxnRecord> incorrectBalanceRecords = findEndBalanceMismatchRecords(transactionRecords, referenceNumbers);
         errorRecords.addAll( incorrectBalanceRecords );
         if(!errorRecords.isEmpty()){
             TxnRecordValidationUtil.processErrorRecords(errorRecords);
@@ -65,16 +60,38 @@ public class CustomerStatementService {
         return errorRecords;
     }
 
-    private boolean validateEndBalance(TxnRecord txnRecord){
-        boolean res = false;
-        BigDecimal startBalance = new BigDecimal(txnRecord.getStartBalance()).setScale(2);
-        BigDecimal mutation = new BigDecimal(txnRecord.getMutation()).setScale(2);
-        BigDecimal endBalance = new BigDecimal(txnRecord.getEndBalance()).setScale(2);
-        if((startBalance.add(mutation)).compareTo(endBalance)!=0){
-            res = true;
-        }
-        return res;
+    private List<TxnRecord> findEndBalanceMismatchRecords(List<TxnRecord> transactionRecords, Set<String> referenceNumbers){
+        List<TxnRecord> incorrectBalanceRecords = transactionRecords.stream()
+                .filter( txn -> !referenceNumbers.contains( txn.getReference()) )
+                //.filter(txn -> validateEndBalance(txn))
+                .filter(TxnRecordValidationUtil::validateEndBalance)
+                //.peek( txn -> txn.getFailureReason().add("BALANCE_MISMATCHED"))
+                .collect( Collectors.toList());
+        incorrectBalanceRecords.stream().forEach( txn -> txn.getFailureReason().add(Constants.BALANCE_MISMATCHED) );
+        return incorrectBalanceRecords;
     }
+
+    private List<TxnRecord> updateFailureReasonInDuplicateReferenceRecords(List<TxnRecord> transactionRecords, Set<String> referenceNumbers){
+        List<TxnRecord> errorRecords = transactionRecords.stream()
+                .filter( txn -> referenceNumbers.contains( txn.getReference() ) )
+                //.peek( t -> t.getFailureReason().add( "DUPLICATE_REFERENCE" ) )
+                .collect( Collectors.toList() );
+        errorRecords.stream().forEach( txn -> {
+            txn.getFailureReason().add( Constants.DUPLICATE_REFERENCE );
+            if (TxnRecordValidationUtil.validateEndBalance( txn )) {
+                txn.getFailureReason().add( Constants.BALANCE_MISMATCHED );
+            }
+        } );
+        return errorRecords;
+    }
+
+    private Set<String> findDuplicateReferenceData(List<TxnRecord> transactionRecords){
+        Set<String> customerTxnReference = new HashSet<>();
+        return transactionRecords.stream().map( TxnRecord::getReference)
+                .filter( txnData -> !customerTxnReference.add( txnData ) ).collect( Collectors.toSet() );
+    }
+
+
 
 
 }
