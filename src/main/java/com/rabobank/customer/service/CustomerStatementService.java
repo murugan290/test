@@ -59,6 +59,9 @@ public class CustomerStatementService {
                 .peek( txn -> txn.getFailureReason().add("BALANCE_MISMATCHED"))
                 .collect( Collectors.toList());
         errorRecords.addAll( incorrectBalanceRecords );
+        if(!errorRecords.isEmpty()){
+            TxnRecordValidationUtil.processErrorRecords(errorRecords);
+        }
         return errorRecords;
     }
 
