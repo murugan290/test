@@ -28,7 +28,12 @@ import java.util.stream.Stream;
 public class CustomerStatementService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerStatementService.class);
 
-
+    /**
+     * This method will parse,process and validate the uploaded file content
+     * @param file
+     * @return List of TxnRecord
+     *
+     */
     public List<TxnRecord> processTransactionRecords(MultipartFile file){
         String fileType = file.getContentType();
         TxnRecordValidationUtil.validateInputFile(file, fileType);
@@ -63,9 +68,7 @@ public class CustomerStatementService {
     private List<TxnRecord> findEndBalanceMismatchRecords(List<TxnRecord> transactionRecords, Set<String> referenceNumbers){
         List<TxnRecord> incorrectBalanceRecords = transactionRecords.stream()
                 .filter( txn -> !referenceNumbers.contains( txn.getReference()) )
-                //.filter(txn -> validateEndBalance(txn))
                 .filter(TxnRecordValidationUtil::validateEndBalance)
-                //.peek( txn -> txn.getFailureReason().add("BALANCE_MISMATCHED"))
                 .collect( Collectors.toList());
         incorrectBalanceRecords.stream().forEach( txn -> txn.getFailureReason().add(Constants.BALANCE_MISMATCHED) );
         return incorrectBalanceRecords;
@@ -74,8 +77,8 @@ public class CustomerStatementService {
     private List<TxnRecord> updateFailureReasonInDuplicateReferenceRecords(List<TxnRecord> transactionRecords, Set<String> referenceNumbers){
         List<TxnRecord> errorRecords = transactionRecords.stream()
                 .filter( txn -> referenceNumbers.contains( txn.getReference() ) )
-                //.peek( t -> t.getFailureReason().add( "DUPLICATE_REFERENCE" ) )
                 .collect( Collectors.toList() );
+
         errorRecords.stream().forEach( txn -> {
             txn.getFailureReason().add( Constants.DUPLICATE_REFERENCE );
             if (TxnRecordValidationUtil.validateEndBalance( txn )) {
@@ -90,8 +93,4 @@ public class CustomerStatementService {
         return transactionRecords.stream().map( TxnRecord::getReference)
                 .filter( txnData -> !customerTxnReference.add( txnData ) ).collect( Collectors.toSet() );
     }
-
-
-
-
 }

@@ -3,6 +3,11 @@ package com.rabobank.customer.exception;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @author - Murugan Rajendran
+ *
+ */
+
 @Getter
 @Setter
 public class UnsupportedFileFormatException extends RuntimeException{

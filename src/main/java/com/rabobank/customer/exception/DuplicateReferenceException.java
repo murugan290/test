@@ -3,8 +3,13 @@ package com.rabobank.customer.exception;
 import com.rabobank.customer.model.TxnRecord;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.List;
+
+
+/**
+ * @author - Murugan Rajendran
+ *
+ */
 
 @Getter
 @Setter

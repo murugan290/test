@@ -7,6 +7,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+
+/**
+ * @author - Murugan Rajendran
+ *
+ */
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter @Setter
 public class ValidationOutcome {

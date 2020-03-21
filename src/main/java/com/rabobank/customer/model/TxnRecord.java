@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Michael Philomin Raj
+ * @author - Murugan Rajendran
  *
  */
 
@@ -18,12 +18,8 @@ import java.util.List;
 @JsonPropertyOrder({"reference","accountNumber","failureReason"})
 public class TxnRecord implements Serializable{
 
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-
-
 
 	@JsonProperty("reference")
 	@JsonAlias("Reference")

@@ -1,18 +1,82 @@
 [
   {
     "Reference": 194261,
-    "AccountNumber": "NL91RABO0315273638",
+    "AccountNumber": "NL91RABO0315273637",
     "Description": "Clothes from Jan Bakker",
     "Start Balance": 21.6,
-    "Mutation": 41.83,
-    "End Balance": 63.40
+    "Mutation": -41.83,
+    "End Balance": -20.23
   },
   {
-    "Reference": 194263,
+    "Reference": 112806,
     "AccountNumber": "NL27SNSB0917829871",
     "Description": "Clothes for Willem Dekker",
     "Start Balance": 91.23,
     "Mutation": "-15.57",
     "End Balance": 106.8
+  },
+  {
+    "Reference": 183049,
+    "AccountNumber": "NL69ABNA0433647324",
+    "Description": "Clothes for Jan King",
+    "Start Balance": 86.66,
+    "Mutation": "-44.5",
+    "End Balance": 131.16
+  },
+  {
+    "Reference": 183356,
+    "AccountNumber": "NL74ABNA0248990274",
+    "Description": "Subscription for Peter de Vries",
+    "Start Balance": 92.98,
+    "Mutation": -46.65,
+    "End Balance": 46.33
+  },
+  {
+    "Reference": 112807,
+    "AccountNumber": "NL69ABNA0433647324",
+    "Description": "Clothes for Richard de Vries",
+    "Start Balance": 90.83,
+    "Mutation": -10.91,
+    "End Balance": 79.92
+  },
+  {
+    "Reference": 112808,
+    "AccountNumber": "NL93ABNA0585619023",
+    "Description": "Tickets from Richard Bakker",
+    "Start Balance": 102.12,
+    "Mutation": "+45.87",
+    "End Balance": 147.99
+  },
+  {
+    "Reference": 139524,
+    "AccountNumber": "NL43AEGO0773393871",
+    "Description": "Flowers from Jan Bakker",
+    "Start Balance": 99.44,
+    "Mutation": "+41.23",
+    "End Balance": 140.67
+  },
+  {
+    "Reference": 179430,
+    "AccountNumber": "NL93ABNA0585619023",
+    "Description": "Clothes for Vincent Bakker",
+    "Start Balance": 23.96,
+    "Mutation": -27.43,
+    "End Balance": -3.47
+  },
+  {
+    "Reference": 141223,
+    "AccountNumber": "NL93ABNA0585619023",
+    "Description": "Clothes from Erik Bakker",
+    "Start Balance": 94.25,
+    "Mutation": "+41.6",
+    "End Balance": 135.85
+  },
+  {
+    "Reference": 195446,
+    "AccountNumber": "NL74ABNA0248990274",
+    "Description": "Flowers for Willem Dekker",
+    "Start Balance": 26.32,
+    "Mutation": "+48.98",
+    "End Balance": 75.3
   }
- ]
+]

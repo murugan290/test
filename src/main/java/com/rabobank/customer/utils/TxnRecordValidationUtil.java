@@ -3,15 +3,18 @@ package com.rabobank.customer.utils;
 
 import com.rabobank.customer.constants.Constants;
 import com.rabobank.customer.exception.*;
-
 import com.rabobank.customer.model.TxnRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.math.BigDecimal;
 import java.util.List;
+
+/**
+ * @author - Murugan Rajendran
+ *
+ */
 
 
 public class TxnRecordValidationUtil {
@@ -22,6 +25,13 @@ public class TxnRecordValidationUtil {
 
     }
 
+    /**
+     * This method will validate the file type and content
+     * @param file
+     * @param fileType
+     * @throw InvalidFileException
+     * @throw UnsupportedFileFormatException
+     */
     public static void validateInputFile(MultipartFile file, String fileType) {
         // Check for empty file
         if(file.isEmpty()){
