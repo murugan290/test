@@ -50,10 +50,10 @@ public class CustomerStatementService {
             throw new FileParsingException(HttpStatus.BAD_REQUEST.value() , Constants.BAD_REQUEST );
         }
         List<TxnRecord> transactionRecords = Stream.of(detail).collect( Collectors.toList());
-        return executeBusinessRules(transactionRecords);
+        return executeCustomerTxnBusinessRules(transactionRecords);
     }
 
-    private List<TxnRecord> executeBusinessRules(List<TxnRecord> transactionRecords){
+    private List<TxnRecord> executeCustomerTxnBusinessRules(List<TxnRecord> transactionRecords){
 
         Set<String> referenceNumbers = findDuplicateReferenceData( transactionRecords );
         List<TxnRecord> errorRecords = updateFailureReasonInDuplicateReferenceRecords( transactionRecords, referenceNumbers );
