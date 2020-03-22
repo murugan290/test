@@ -3,8 +3,8 @@ package com.rabobank.customer.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabobank.customer.constants.Constants;
 import com.rabobank.customer.exception.FileParsingException;
-import com.rabobank.customer.model.TxnRecord;
-import com.rabobank.customer.utils.TxnRecordValidationUtil;
+import com.rabobank.customer.model.TransactionRecord;
+import com.rabobank.customer.utils.TransactionRecordValidationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -31,66 +31,64 @@ public class CustomerStatementService {
     /**
      * This method will parse,process and validate the uploaded file content
      * @param file
-     * @return List of TxnRecord
+     * @return List of TransactionRecord
      *
      */
-    public List<TxnRecord> processTransactionRecords(MultipartFile file){
-        String fileType = file.getContentType();
-        TxnRecordValidationUtil.validateInputFile(file, fileType);
-        return validateCustomerTxnRecords(file);
+    public List<TransactionRecord> processTransactionRecords(MultipartFile file){
+        TransactionRecordValidationUtil.validateInputFile(file);
+        return applyBusinessRules(parseInputFile(file));
     }
 
-    private List<TxnRecord> validateCustomerTxnRecords(MultipartFile file){
-        TxnRecord[] detail = null;
+    private List<TransactionRecord> parseInputFile(MultipartFile file){
+        TransactionRecord[] detail = null;
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            detail = objectMapper.readValue(file.getInputStream(), TxnRecord[].class);
+            detail = objectMapper.readValue(file.getInputStream(), TransactionRecord[].class);
         } catch (IOException e) {
             LOGGER.error("Parsing file with fileName = {} failed. And the reason is : {}", file.getName() , e);
             throw new FileParsingException(HttpStatus.BAD_REQUEST.value() , Constants.BAD_REQUEST );
         }
-        List<TxnRecord> transactionRecords = Stream.of(detail).collect( Collectors.toList());
-        return executeCustomerTxnBusinessRules(transactionRecords);
+        return Stream.of(detail).collect( Collectors.toList());
     }
 
-    private List<TxnRecord> executeCustomerTxnBusinessRules(List<TxnRecord> transactionRecords){
-
+    private List<TransactionRecord> applyBusinessRules(List<TransactionRecord> transactionRecords){
         Set<String> referenceNumbers = findDuplicateReferenceData( transactionRecords );
-        List<TxnRecord> errorRecords = updateFailureReasonInDuplicateReferenceRecords( transactionRecords, referenceNumbers );
-        List<TxnRecord> incorrectBalanceRecords = findEndBalanceMismatchRecords(transactionRecords, referenceNumbers);
+        List<TransactionRecord> errorRecords = validateForDuplicateReference( transactionRecords, referenceNumbers );
+        List<TransactionRecord> incorrectBalanceRecords = validateForEndBalanceMismatch(transactionRecords, referenceNumbers);
         errorRecords.addAll( incorrectBalanceRecords );
         if(!errorRecords.isEmpty()){
-            TxnRecordValidationUtil.processErrorRecords(errorRecords);
+           TransactionRecordValidationUtil.processErrorRecords(errorRecords);
         }
         return errorRecords;
     }
 
-    private List<TxnRecord> findEndBalanceMismatchRecords(List<TxnRecord> transactionRecords, Set<String> referenceNumbers){
-        List<TxnRecord> incorrectBalanceRecords = transactionRecords.stream()
+    private List<TransactionRecord> validateForEndBalanceMismatch(List<TransactionRecord> transactionRecords, Set<String> referenceNumbers){
+        List<TransactionRecord> incorrectBalanceRecords = transactionRecords.stream()
                 .filter( txn -> !referenceNumbers.contains( txn.getReference()) )
-                .filter(TxnRecordValidationUtil::validateEndBalance)
+                .filter(TransactionRecordValidationUtil::validateEndBalance)
                 .collect( Collectors.toList());
         incorrectBalanceRecords.stream().forEach( txn -> txn.getFailureReason().add(Constants.BALANCE_MISMATCHED) );
         return incorrectBalanceRecords;
     }
 
-    private List<TxnRecord> updateFailureReasonInDuplicateReferenceRecords(List<TxnRecord> transactionRecords, Set<String> referenceNumbers){
-        List<TxnRecord> errorRecords = transactionRecords.stream()
+
+    private List<TransactionRecord> validateForDuplicateReference(List<TransactionRecord> transactionRecords, Set<String> referenceNumbers){
+        List<TransactionRecord> invalidRecords = transactionRecords.stream()
                 .filter( txn -> referenceNumbers.contains( txn.getReference() ) )
                 .collect( Collectors.toList() );
 
-        errorRecords.stream().forEach( txn -> {
+        invalidRecords.stream().forEach( txn -> {
             txn.getFailureReason().add( Constants.DUPLICATE_REFERENCE );
-            if (TxnRecordValidationUtil.validateEndBalance( txn )) {
+            if (TransactionRecordValidationUtil.validateEndBalance( txn )) {// segrate this logic seprately
                 txn.getFailureReason().add( Constants.BALANCE_MISMATCHED );
             }
         } );
-        return errorRecords;
+        return invalidRecords;
     }
 
-    private Set<String> findDuplicateReferenceData(List<TxnRecord> transactionRecords){
+    private Set<String> findDuplicateReferenceData(List<TransactionRecord> transactionRecords){
         Set<String> customerTxnReference = new HashSet<>();
-        return transactionRecords.stream().map( TxnRecord::getReference)
+        return transactionRecords.stream().map( TransactionRecord::getReference)
                 .filter( txnData -> !customerTxnReference.add( txnData ) ).collect( Collectors.toSet() );
     }
 }

@@ -3,7 +3,7 @@ package com.rabobank.customer;
 
 import com.rabobank.customer.constants.Constants;
 import com.rabobank.customer.controller.CustomerStatementController;
-import com.rabobank.customer.response.ValidationOutcome;
+import com.rabobank.customer.response.CustomerValidationResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
 import java.io.File;
 import java.net.URI;
 import static org.junit.Assert.*;
@@ -57,12 +56,12 @@ public class CustomerStatementApplicationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        ResponseEntity<ValidationOutcome> result = restTemplate.postForEntity(uri, requestEntity, ValidationOutcome.class);
+        ResponseEntity<CustomerValidationResult> result = restTemplate.postForEntity(uri, requestEntity, CustomerValidationResult.class);
 
         assertNotEquals(null, result);
         assertNotNull(result.getStatusCodeValue());
         assertEquals(200, result.getStatusCodeValue());
-        ValidationOutcome outcome = result.getBody();
+        CustomerValidationResult outcome = result.getBody();
         assertNotNull(outcome);
         assertNotNull(outcome.getMessage());
         assertEquals("SUCCESSFUL", outcome.getMessage());
@@ -79,13 +78,13 @@ public class CustomerStatementApplicationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        ResponseEntity<ValidationOutcome> result = restTemplate.postForEntity(uri, requestEntity, ValidationOutcome.class);
+        ResponseEntity<CustomerValidationResult> result = restTemplate.postForEntity(uri, requestEntity, CustomerValidationResult.class);
         System.out.println("result " + result);
 
         assertNotEquals(null, result);
         assertNotNull(result.getStatusCodeValue());
         assertEquals(200, result.getStatusCodeValue());
-        ValidationOutcome outcome = result.getBody();
+        CustomerValidationResult outcome = result.getBody();
         assertNotNull(outcome);
         assertNotNull(outcome.getMessage());
         assertEquals(Constants.DUPLICATE_REFERENCE_INCORRECT_END_BALANCE, outcome.getMessage());
@@ -115,13 +114,13 @@ public class CustomerStatementApplicationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        ResponseEntity<ValidationOutcome> result = restTemplate.postForEntity(uri, requestEntity, ValidationOutcome.class);
+        ResponseEntity<CustomerValidationResult> result = restTemplate.postForEntity(uri, requestEntity, CustomerValidationResult.class);
         System.out.println("result " + result);
 
         assertNotEquals(null, result);
         assertNotNull(result.getStatusCodeValue());
         assertEquals(200, result.getStatusCodeValue());
-        ValidationOutcome outcome = result.getBody();
+        CustomerValidationResult outcome = result.getBody();
         assertNotNull(outcome);
         assertNotNull(outcome.getMessage());
         assertEquals(Constants.INCORRECT_END_BALANCE, outcome.getMessage());
@@ -147,13 +146,13 @@ public class CustomerStatementApplicationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        ResponseEntity<ValidationOutcome> result = restTemplate.postForEntity(uri, requestEntity, ValidationOutcome.class);
+        ResponseEntity<CustomerValidationResult> result = restTemplate.postForEntity(uri, requestEntity, CustomerValidationResult.class);
         System.out.println("result " + result);
 
         assertNotEquals(null, result);
         assertNotNull(result.getStatusCodeValue());
         assertEquals(200, result.getStatusCodeValue());
-        ValidationOutcome outcome = result.getBody();
+        CustomerValidationResult outcome = result.getBody();
         assertNotNull(outcome);
         assertNotNull(outcome.getMessage());
         assertEquals(Constants.DUPLICATE_REFERENCE, outcome.getMessage());
@@ -180,12 +179,12 @@ public class CustomerStatementApplicationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        ResponseEntity<ValidationOutcome> result = restTemplate.postForEntity(uri, requestEntity, ValidationOutcome.class);
+        ResponseEntity<CustomerValidationResult> result = restTemplate.postForEntity(uri, requestEntity, CustomerValidationResult.class);
         System.out.println("result " + result);
         assertNotEquals(null, result);
         assertNotNull(result.getStatusCodeValue());
         assertEquals(400, result.getStatusCodeValue());
-        ValidationOutcome outcome = result.getBody();
+        CustomerValidationResult outcome = result.getBody();
         assertNotNull(outcome);
         assertNotNull(outcome.getMessage());
         assertEquals(Constants.BAD_REQUEST, outcome.getMessage());
@@ -202,12 +201,12 @@ public class CustomerStatementApplicationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        ResponseEntity<ValidationOutcome> result = restTemplate.postForEntity(uri, requestEntity, ValidationOutcome.class);
+        ResponseEntity<CustomerValidationResult> result = restTemplate.postForEntity(uri, requestEntity, CustomerValidationResult.class);
         System.out.println("result " + result);
         assertNotEquals(null, result);
         assertNotNull(result.getStatusCodeValue());
         assertEquals(500, result.getStatusCodeValue());
-        ValidationOutcome outcome = result.getBody();
+        CustomerValidationResult outcome = result.getBody();
         assertNotNull(outcome);
         assertNotNull(outcome.getMessage());
         assertEquals(Constants.INTERNAL_SERVER_ERROR, outcome.getMessage());
@@ -224,12 +223,12 @@ public class CustomerStatementApplicationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        ResponseEntity<ValidationOutcome> result = restTemplate.postForEntity(uri, requestEntity, ValidationOutcome.class);
+        ResponseEntity<CustomerValidationResult> result = restTemplate.postForEntity(uri, requestEntity, CustomerValidationResult.class);
         System.out.println("result " + result);
         assertNotEquals(null, result);
         assertNotNull(result.getStatusCodeValue());
         assertEquals(500, result.getStatusCodeValue());
-        ValidationOutcome outcome = result.getBody();
+        CustomerValidationResult outcome = result.getBody();
         assertNotNull(outcome);
         assertNotNull(outcome.getMessage());
         assertEquals(Constants.INTERNAL_SERVER_ERROR, outcome.getMessage());

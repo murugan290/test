@@ -8,16 +8,15 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author - Murugan Rajendran
- *
  */
 
 @RunWith(SpringRunner.class)
-public class TxnRecordTest {
+public class TransactionRecordTest {
 
 
     @Test
-    public void testTanRecord() {
-        TxnRecord recordDetail1 = new TxnRecord();
+    public void testTransactionRecord() {
+        TransactionRecord recordDetail1 = new TransactionRecord();
         recordDetail1.setReference("194261");
         recordDetail1.setAccountNumber("NL91RABO0315273637");
         recordDetail1.setDescription("Clothes from Jan Bakker");

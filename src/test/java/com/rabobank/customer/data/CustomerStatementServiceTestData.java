@@ -1,13 +1,9 @@
-package com.rabobank.customer.Data;
+package com.rabobank.customer.data;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabobank.customer.constants.Constants;
-import com.rabobank.customer.exception.FileParsingException;
-import com.rabobank.customer.model.TxnRecord;
-import com.rabobank.customer.service.CustomerStatementService;
+import com.rabobank.customer.model.TransactionRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
@@ -23,11 +19,11 @@ import java.util.stream.Stream;
  *
  */
 
-public class CustomerTxnData {
+public class CustomerStatementServiceTestData {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerTxnData.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerStatementServiceTestData.class);
 
-    public List<TxnRecord> getDuplicationReferenceDataSet() throws Exception{
+    public List<TransactionRecord> getDuplicationReferenceDataSet() throws Exception{
         MockMultipartFile multipartFile = null;
         InputStream is=null;
         File csvFile = new File(this.getClass().getResource("/records_duplicate_reference.json").getFile());
@@ -37,7 +33,7 @@ public class CustomerTxnData {
         return getTxnRecords(multipartFile);
     }
 
-    public List<TxnRecord> getIncorrectBalanceDataSet() throws Exception{
+    public List<TransactionRecord> getIncorrectBalanceDataSet() throws Exception{
         File csvFile = new File(this.getClass().getResource("/records_balance_mismatch.json").getFile());
         InputStream is = new FileInputStream(csvFile);
         MockMultipartFile multipartFile = new MockMultipartFile("json", "records_balance_mismatch.json", "application/json", is);
@@ -45,7 +41,7 @@ public class CustomerTxnData {
         return getTxnRecords(multipartFile);
     }
 
-    public List<TxnRecord> getAllValidDataSet() throws Exception{
+    public List<TransactionRecord> getAllValidDataSet() throws Exception{
         File csvFile = new File(this.getClass().getResource("/records_success.json").getFile());
         InputStream is = new FileInputStream(csvFile);
         MockMultipartFile multipartFile = new MockMultipartFile("json", "records_success.json", "application/json", is);
@@ -53,7 +49,7 @@ public class CustomerTxnData {
         return getTxnRecords(multipartFile);
     }
 
-    public List<TxnRecord> getDuplicateRefAndIncorrentBalDataset() throws Exception{
+    public List<TransactionRecord> getDuplicateRefAndIncorrentBalDataset() throws Exception{
         File csvFile = new File(this.getClass().getResource("/duplicate_refrence_and_Balance_mismatch_in_same_record.json").getFile());
         InputStream is = new FileInputStream(csvFile);
         MockMultipartFile multipartFile = new MockMultipartFile("json", "duplicate_refrence_and_Balance_mismatch_in_same_record.json", "application/json", is);
@@ -62,16 +58,16 @@ public class CustomerTxnData {
     }
 
 
-    private static List<TxnRecord> getTxnRecords(MultipartFile file){
+    private static List<TransactionRecord> getTxnRecords(MultipartFile file){
         ObjectMapper objectMapper = new ObjectMapper();
-        TxnRecord[] detail = null;
+        TransactionRecord[] detail = null;
         try {
-            detail = objectMapper.readValue(file.getInputStream(), TxnRecord[].class);
+            detail = objectMapper.readValue(file.getInputStream(), TransactionRecord[].class);
         } catch (IOException e) {
-            LOGGER.error("CustomerTxnData :: Parsing file with fileName = {} failed. And the reason is : {}", file.getName() , e);
+            LOGGER.error("CustomerStatementServiceTestData :: Parsing file with fileName = {} failed. And the reason is : {}", file.getName() , e);
 
         }
-        List<TxnRecord> transactionRecords = Stream.of(detail).collect( Collectors.toList());
+        List<TransactionRecord> transactionRecords = Stream.of(detail).collect( Collectors.toList());
         return transactionRecords;
     }
 

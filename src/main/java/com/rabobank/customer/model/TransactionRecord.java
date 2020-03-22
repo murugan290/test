@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @JsonPropertyOrder({"reference","accountNumber","failureReason"})
-public class TxnRecord implements Serializable{
+public class TransactionRecord implements Serializable{
 
 
 	private static final long serialVersionUID = 1L;

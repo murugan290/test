@@ -3,10 +3,9 @@ package com.rabobank.customer.controller;
 
 import com.rabobank.customer.exception.FileParsingException;
 import com.rabobank.customer.exception.InvalidFileException;
-import com.rabobank.customer.exception.InvalidFileExceptionTest;
 import com.rabobank.customer.exception.UnsupportedFileFormatException;
-import com.rabobank.customer.model.TxnRecord;
-import com.rabobank.customer.response.ValidationOutcome;
+import com.rabobank.customer.model.TransactionRecord;
+import com.rabobank.customer.response.CustomerValidationResult;
 import com.rabobank.customer.service.CustomerStatementService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,13 +17,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,9 +48,9 @@ public class CustomerStatementControllerTest {
         InputStream is = new FileInputStream(jsonFile);
         MockMultipartFile multipartFile = new MockMultipartFile("json", "records_success.json", "application/json", is);
         is.close();
-        List<TxnRecord> reports = new ArrayList<>();
+        List<TransactionRecord> reports = new ArrayList<>();
         Mockito.when(customerStatementService.processTransactionRecords(multipartFile)).thenReturn(reports);
-        ResponseEntity<ValidationOutcome> result = customerStatementController.processInputFile(multipartFile);
+        ResponseEntity<CustomerValidationResult> result = customerStatementController.processInputFile(multipartFile);
         Assert.assertNotEquals(null, result);
         Assert.assertEquals(HttpStatus.OK.value(), result.getStatusCodeValue());
         assertEquals(message, result.getBody().getMessage());
